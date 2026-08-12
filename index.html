@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════════════
    DESIGN SYSTEM — Treasure Hunt
@@ -99,6 +100,15 @@ button.primary:hover:not(:disabled){background:var(--brand-300); border-color:va
 button.ghost{background:transparent}
 button.big{padding:13px 30px; font-size:var(--fs-lg); border-radius:var(--r-pill)}
 
+/* ── input ── */
+input[type=text]{
+  font:inherit; font-weight:600; letter-spacing:.18em; text-align:center; text-transform:uppercase;
+  color:var(--ink); background:rgba(0,0,0,.25); border:1px solid var(--line);
+  border-radius:var(--r-md); padding:11px 14px; width:100%; outline:none;
+}
+input[type=text]:focus{border-color:var(--brand)}
+input[type=text]::placeholder{color:var(--ink-30); letter-spacing:.18em}
+
 /* ── layout ── */
 header{
   display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap;
@@ -112,6 +122,12 @@ header{
 .brandmark b{font-weight:900; letter-spacing:.06em; font-size:var(--fs-lg)}
 .brandmark span{color:var(--ink-50); font-size:var(--fs-sm); font-weight:500}
 .spacer{flex:1}
+.roomchip{
+  display:flex; align-items:center; gap:var(--sp-2); padding:6px 14px;
+  border-radius:var(--r-pill); background:var(--brand-wash); border:1px solid var(--brand);
+  font-weight:900; letter-spacing:.18em; font-size:var(--fs-md);
+}
+.roomchip small{font-weight:500; letter-spacing:.06em; color:var(--ink-50); font-size:var(--fs-xs)}
 
 main{display:flex; gap:var(--sp-4); padding:var(--sp-4) var(--sp-5) var(--sp-6); align-items:flex-start; flex-wrap:wrap}
 
@@ -148,9 +164,12 @@ aside{flex:0 0 340px; display:flex; flex-direction:column; gap:var(--sp-3)}
 /* ── scores ── */
 .srow{display:flex; align-items:center; gap:var(--sp-2); padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06)}
 .srow:last-child{border-bottom:none}
-.srow .nm{font-weight:600; font-size:var(--fs-md); width:64px}
+.srow .nm{font-weight:600; font-size:var(--fs-md); width:74px}
 .srow .pts{margin-left:auto; font-weight:900; color:var(--brand); font-size:var(--fs-lg)}
-.chips{display:flex; gap:3px; flex-wrap:wrap; max-width:150px}
+.tag{font-size:var(--fs-2xs); font-weight:600; letter-spacing:.06em; padding:1px 6px;
+  border-radius:var(--r-pill); background:var(--surface-2); color:var(--ink-50)}
+.tag.me{background:var(--brand); color:var(--deep-900)}
+.chips{display:flex; gap:3px; flex-wrap:wrap; max-width:140px}
 .chip{width:19px;height:19px;border-radius:6px;display:grid;place-items:center;
   font-size:var(--fs-2xs); font-weight:600; background:var(--surface-2); color:var(--ink-70)}
 .chip.mark{background:var(--gold); color:var(--deep-900); box-shadow:0 0 0 2px rgba(245,196,81,.3)}
@@ -193,26 +212,38 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
 
 /* ── overlays ── */
 .overlay{position:fixed; inset:0; z-index:60; display:none; place-items:center; padding:var(--sp-5);
-  background:rgba(2,33,40,.86); backdrop-filter:blur(18px)}
+  background:rgba(2,33,40,.86); backdrop-filter:blur(18px); overflow:auto}
 .overlay.show{display:grid}
-.sheet{max-width:520px; width:100%; text-align:center; padding:var(--sp-6);
+.sheet{max-width:540px; width:100%; text-align:center; padding:var(--sp-6);
   background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--elev-2)}
-.opts{display:flex; gap:var(--sp-3); margin:var(--sp-5) 0}
-.opt{flex:1; padding:var(--sp-4); border-radius:var(--r-md); cursor:pointer; text-align:left;
+.opts{display:flex; gap:var(--sp-2); margin:var(--sp-4) 0}
+.opt{flex:1; padding:var(--sp-3); border-radius:var(--r-md); cursor:pointer; text-align:left;
   background:var(--surface-2); border:1px solid var(--line); transition:.15s}
 .opt:hover{border-color:var(--line-strong)}
 .opt.on{border-color:var(--brand); background:var(--brand-wash); box-shadow:0 0 0 1px var(--brand)}
-.opt .h{font-weight:600; margin-bottom:2px}
-.opt .d{font-size:var(--fs-sm); color:var(--ink-50); line-height:1.45}
-.picks{display:flex; gap:var(--sp-2); margin-bottom:var(--sp-5)}
+.opt .h{font-weight:600; margin-bottom:2px; font-size:var(--fs-md)}
+.opt .d{font-size:var(--fs-xs); color:var(--ink-50); line-height:1.45}
+.picks{display:flex; gap:var(--sp-2); margin-bottom:var(--sp-4)}
 .pick{flex:1; padding:var(--sp-3); border-radius:var(--r-md); cursor:pointer;
   background:var(--surface-2); border:1px solid var(--line); transition:.15s}
 .pick:hover{border-color:var(--line-strong)}
 .pick.on{border-color:var(--brand); background:var(--brand-wash)}
+.pick.taken{opacity:.35; cursor:not-allowed}
 .pick .e{font-size:22px}
 .pick .n{font-weight:600; font-size:var(--fs-md); margin-top:2px}
 .pick .s{font-size:var(--fs-xs); color:var(--ink-50)}
 .hidden{display:none !important}
+
+/* ── lobby ── */
+.codebox{font-weight:900; font-size:var(--fs-2xl); letter-spacing:.32em; padding:var(--sp-3);
+  border-radius:var(--r-md); background:rgba(0,0,0,.25); border:1px dashed var(--brand); color:var(--brand)}
+.joinrow{display:flex; gap:var(--sp-2); align-items:center}
+.plist{text-align:left; margin:var(--sp-3) 0}
+.prow{display:flex; align-items:center; gap:var(--sp-2); padding:7px 10px; border-radius:var(--r-md);
+  background:var(--surface-2); margin-bottom:6px; font-size:var(--fs-md)}
+.prow .st{margin-left:auto; font-size:var(--fs-xs); color:var(--ink-50); font-weight:600}
+.prow .st.live{color:var(--brand)}
+.note{font-size:var(--fs-sm); color:var(--ink-50); line-height:1.6}
 
 @media(max-width:960px){ aside{flex:1 1 100%} header{padding:var(--sp-3)} main{padding:var(--sp-3)} }
 </style>
@@ -223,18 +254,22 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
 <div class="overlay show" id="start">
   <div class="sheet">
     <div class="t-label">Nickelfox · Board Edition</div>
-    <h1 class="t-display" style="margin:var(--sp-2) 0 var(--sp-2)">TREASURE HUNT</h1>
+    <h1 class="t-display" style="margin:var(--sp-2) 0">TREASURE HUNT</h1>
     <p class="t-body">해적 · 산적 · 도적이 217칸의 거대 육각판에서 50장의 보물을 두고 겨룹니다.</p>
 
     <div class="t-label" style="margin-top:var(--sp-5);text-align:left">플레이 방식</div>
     <div class="opts">
       <div class="opt on" data-mode="local">
         <div class="h">3인 플레이</div>
-        <div class="d">한 화면에서 세 명이<br>번갈아 진행합니다.</div>
+        <div class="d">한 화면에서<br>번갈아 진행</div>
       </div>
       <div class="opt" data-mode="ai">
         <div class="h">AI 대전</div>
-        <div class="d">한 세력을 맡고<br>나머지 둘은 AI가 조작합니다.</div>
+        <div class="d">한 세력을 맡고<br>나머지는 AI</div>
+      </div>
+      <div class="opt" data-mode="online">
+        <div class="h">온라인 멀티</div>
+        <div class="d">방 코드로<br>다른 컴퓨터와</div>
       </div>
     </div>
 
@@ -243,7 +278,26 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
       <div class="picks" id="picks"></div>
     </div>
 
-    <button class="primary big" id="startGo">게임 시작</button>
+    <!-- 온라인 로비 -->
+    <div id="netWrap" class="hidden">
+      <div id="netIdle">
+        <button class="primary big" id="netHost" style="width:100%">방 만들기</button>
+        <div class="note" style="margin:var(--sp-3) 0">또는 친구가 알려준 코드로 참가하세요</div>
+        <div class="joinrow">
+          <input type="text" id="netCode" placeholder="ABC123" maxlength="6">
+          <button id="netJoin" style="flex:0 0 auto">참가</button>
+        </div>
+      </div>
+      <div id="netRoom" class="hidden">
+        <div class="t-label" style="text-align:left">방 코드</div>
+        <div class="codebox" id="roomCode">------</div>
+        <button class="ghost" id="copyCode" style="margin-top:var(--sp-2)">코드 복사</button>
+        <div class="plist" id="plist"></div>
+      </div>
+      <div class="note" id="netMsg" style="margin-top:var(--sp-3)"></div>
+    </div>
+
+    <button class="primary big" id="startGo" style="margin-top:var(--sp-4)">게임 시작</button>
   </div>
 </div>
 
@@ -260,6 +314,7 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
   <button id="btnRestart" class="ghost">↺ 같은 지형으로 재시작</button>
   <button id="btnVeil" class="ghost">🙈 화면 가리기</button>
   <div class="spacer"></div>
+  <div class="roomchip hidden" id="roomChip"><small>ROOM</small> <span id="roomChipCode"></span></div>
   <button id="btnNew" class="ghost">⇱ 시작 화면</button>
 </header>
 
@@ -349,7 +404,7 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
   </aside>
 </main>
 
-<!-- ══════════ 가림막 / 결과 ══════════ -->
+<!-- ══════════ 가림막 / 결과 / 연결 끊김 ══════════ -->
 <div class="overlay" id="veil">
   <div class="sheet">
     <div style="font-size:44px">🙈</div>
@@ -368,6 +423,15 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
   </div>
 </div>
 
+<div class="overlay" id="lost">
+  <div class="sheet">
+    <div style="font-size:44px">🔌</div>
+    <h2 class="t-title" style="margin:var(--sp-3) 0">호스트와 연결이 끊겼습니다</h2>
+    <p class="t-body">방이 닫혔거나 네트워크가 불안정합니다.</p>
+    <button class="primary big" id="lostOk" style="margin-top:var(--sp-4)">시작 화면으로</button>
+  </div>
+</div>
+
 <script>
 /* ═══════════ 설정값 ═══════════ */
 const RADIUS = 8;                 // 한 변 9칸 => 3*9*8+1 = 217칸
@@ -377,6 +441,7 @@ const WATER_RANGE = 4;            // 해적 물길 최대 이동
 const ACTIONS_PER_TURN = 3;
 const DECK_SIZE = 50, FACEUP = 4;
 const AI_DELAY = 700;
+const ROOM_PREFIX = 'thunt-';     // PeerJS ID 접두사
 
 const TERRAIN = {
   sea:      {name:'바다', fill:'#1E6FA8'},
@@ -384,12 +449,14 @@ const TERRAIN = {
   city:     {name:'도시', fill:'#D14A43'},
   plain:    {name:'평야', fill:'#E8C766'}
 };
+const TERRAIN_ORDER = ['sea','mountain','city','plain'];
 
 const FACTIONS = [
   {id:'pirate', name:'해적', icon:'🏴‍☠️', color:'#0B2A33', home:'sea',      power:'물길 타기'},
   {id:'bandit', name:'산적', icon:'🪓',   color:'#7A4A22', home:'mountain', power:'집라인'},
   {id:'thief',  name:'도적', icon:'🗡️',  color:'#6D3FA8', home:'city',     power:'은신'}
 ];
+const FDEF = id => FACTIONS.find(f=>f.id===id);
 
 const TREASURE_NAMES = ['금괴','보석 상자','고대 유물','진주 목걸이','황금 왕관','은화 주머니',
   '향신료 궤','해도 조각','성배','루비 반지','상아 조각상','비단 두루마리','호박 원석','금화 자루'];
@@ -403,12 +470,24 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=
 function hexDist(a,b){ const dq=a.q-b.q, dr=a.r-b.r; return (Math.abs(dq)+Math.abs(dq+dr)+Math.abs(dr))/2; }
 function svgEl(tag,attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
   for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+const parseKey = k => { const [q,r]=k.split(',').map(Number); return {q,r}; };
 
 /* ═══════════ 상태 ═══════════ */
 let tiles = new Map();
 let S = null;
 let aiTimer = null;
 let setup = { mode:'local', myFaction:'pirate' };
+
+/* 네트워크 — role: null(로컬) | 'host' | 'guest' */
+let net = {
+  on:false, role:null, peer:null, code:null,
+  conns:[],                 // 호스트: 연결된 게스트들
+  host:null,                // 게스트: 호스트 연결
+  seat:null,                // 내가 맡은 세력 id
+  owners:{},                // 호스트 전용: 세력 -> 'me' | peerId | 'ai'
+  kinds:{},                 // 양쪽 공용: 세력 -> 'human' | 'ai'
+  started:false
+};
 
 /* ═══════════ 판 생성 ═══════════ */
 function buildTiles(){
@@ -463,7 +542,20 @@ function generateTerrain(){
     if(t.peak) continue;
     if(peaks.every(p=>hexDist(p,t)>=4)){ t.peak=true; peaks.push(t); }
   }
-  if(peaks.length<2) mts.slice(0,2).forEach(t=>{ if(!t.peak){t.peak=true;} });
+  if(peaks.length<2) mts.slice(0,2).forEach(t=>{ t.peak=true; });
+}
+
+/* 지형을 그대로 전송하기 위한 직렬화 (Map 순회 순서는 양쪽이 동일하다) */
+function encodeTerrain(){
+  return [...tiles.values()].map(t=>TERRAIN_ORDER.indexOf(t.terrain) + (t.peak?10:0));
+}
+function decodeTerrain(arr){
+  buildTiles();
+  [...tiles.values()].forEach((t,i)=>{
+    const v=arr[i];
+    t.peak = v>=10;
+    t.terrain = TERRAIN_ORDER[v%10];
+  });
 }
 
 /* ═══════════ 보드 렌더 ═══════════ */
@@ -503,17 +595,34 @@ function drawBoard(){
   }
 }
 
-/* 은신 중인 세력의 실제 위치는 (사람이 조작하는) 자기 차례에만 보인다 */
-const isAI = f => setup.mode==='ai' && f.id!==setup.myFaction;
-const visible = f => !f.hidden || (S.factions[S.turn].id===f.id && !isAI(f));
+/* ── 시점 / 소유 ── */
+const isAI = f => net.on ? net.kinds[f.id]==='ai'
+                         : (setup.mode==='ai' && f.id!==setup.myFaction);
+/* 지금 화면을 보는 사람의 세력 (로컬 핫시트는 현재 차례의 사람) */
+function viewerId(){
+  if(net.on) return net.seat;
+  const cur=S.factions[S.turn];
+  return isAI(cur) ? null : cur.id;
+}
+/* 내가 지금 행동할 수 있는가 */
+const myActorId = () => net.on ? net.seat : (S ? S.factions[S.turn].id : null);
+function isMyTurn(){
+  if(!S || S.over) return false;
+  const cur=S.factions[S.turn];
+  return !isAI(cur) && cur.id===myActorId();
+}
+const isVisible = f => !f.hidden || f.id===viewerId();
 
 function render(){
+  const viewer=viewerId();
+  S.factions.forEach(f=> f.masked = f.hidden && f.id!==viewer);
+
   const cur = S.factions[S.turn];
   const hl = new Set(S.highlight);
   for(const t of tiles.values()){
     let c='hex';
     if(hl.has(K(t.q,t.r))) c += (S.mode==='power' ? ' hl2 clickable' : ' hl clickable');
-    if(!S.over && visible(cur) && cur.pos.q===t.q && cur.pos.r===t.r) c+=' sel';
+    if(!S.over && !cur.masked && cur.pos.q===t.q && cur.pos.r===t.r) c+=' sel';
     t.poly.setAttribute('class', c);
   }
 
@@ -530,7 +639,7 @@ function render(){
 
   layerPawn.innerHTML='';
   for(const f of S.factions){
-    const shown = visible(f);
+    const shown = !f.masked;
     const t = shown ? tiles.get(K(f.pos.q,f.pos.r)) : tiles.get(f.lastKnown);
     if(!t) continue;
     const g=svgEl('g',{'pointer-events':'none', opacity: shown?1:.7});
@@ -543,17 +652,19 @@ function render(){
     layerPawn.append(g);
   }
   renderPanel();
+  if(net.role==='host' && net.started) broadcastState();
 }
 
 /* ═══════════ 패널 렌더 ═══════════ */
 function renderPanel(){
   const f = S.factions[S.turn];
   const ai = isAI(f);
+  const mine = isMyTurn();
   $('tAvatar').textContent = f.icon;
   $('tAvatar').style.background = f.color;
-  $('tName').textContent = `${f.name}의 차례${ai?' (AI)':''}`;
+  $('tName').textContent = `${f.name}의 차례${ai?' (AI)':''}${net.on&&f.id===net.seat?' · 나':''}`;
   const t = tiles.get(K(f.pos.q,f.pos.r));
-  $('tWhere').textContent = (!visible(f))
+  $('tWhere').textContent = f.masked
     ? '위치 비공개 · 은신 중'
     : `(${t.q}, ${t.r}) · ${TERRAIN[t.terrain].name}${t.peak?' ▲':''}${f.hidden?' · 은신 중':''}`;
 
@@ -563,18 +674,19 @@ function renderPanel(){
   }
 
   const onTre = S.faceUp.some(c=>c.at===K(f.pos.q,f.pos.r));
-  const canPower = powerTargets(f)!==null;
-  const lock = S.over || S.left<=0 || ai;
+  const canPower = mine && powerTargets(f)!==null;
+  const lock = !mine || S.left<=0;
   $('aMove').disabled  = lock;
   $('aPower').disabled = lock || !canPower;
   $('aTake').disabled  = lock || !onTre;
-  $('aEnd').disabled   = S.over || ai;
+  $('aEnd').disabled   = !mine;
   $('aMove').classList.toggle('on', S.mode==='move');
   $('aPower').classList.toggle('on', S.mode==='power');
 
   let h='';
   if(S.over) h='게임이 끝났습니다.';
   else if(ai) h='AI가 생각하는 중…';
+  else if(!mine) h=`${f.name} 플레이어의 차례를 기다리는 중…`;
   else if(S.mode==='move')  h='흰 테두리로 표시된 인접 칸을 클릭해 이동하세요.';
   else if(S.mode==='power') h = f.id==='pirate'
       ? `물길을 따라 이어진 바다 칸(최대 ${WATER_RANGE}칸)으로 이동합니다.`
@@ -587,9 +699,13 @@ function renderPanel(){
     const target = medianLoot(x);
     const chips = [...x.loot].sort((a,b)=>a.value-b.value).map(c=>
       `<div class="chip${c===target?' mark':''}" title="${c.name} ${c.value}점">${c.value}</div>`).join('');
+    const tag = net.on
+      ? (x.id===net.seat ? '<span class="tag me">나</span>'
+        : isAI(x) ? '<span class="tag">AI</span>' : '<span class="tag">온라인</span>')
+      : (isAI(x) ? '<span class="tag">AI</span>' : '');
     return `<div class="srow">
       <div class="avatar" style="width:26px;height:26px;border-radius:8px;font-size:13px;background:${x.color}">${x.icon}</div>
-      <div class="nm">${x.name}${isAI(x)?'<span style="color:var(--ink-30);font-size:var(--fs-xs)"> AI</span>':''}</div>
+      <div class="nm">${x.name} ${tag}</div>
       <div class="chips">${chips||'<span style="color:var(--ink-30);font-size:var(--fs-xs)">보물 없음</span>'}</div>
       <div class="pts num">${score(x)}</div></div>`;
   }).join('');
@@ -626,7 +742,7 @@ function newGame(newTerrain){
   FACTIONS.forEach((def,i)=>{
     const s = starts[i];
     S.factions.push({...def, pos:{q:s.q,r:s.r}, loot:[], hidden:false, hiddenTurns:0,
-                     lastKnown:K(s.q,s.r)});
+                     masked:false, lastKnown:K(s.q,s.r)});
   });
 
   S.deck = shuffle(Array.from({length:DECK_SIZE},(_,i)=>({
@@ -635,13 +751,29 @@ function newGame(newTerrain){
   for(let i=0;i<FACEUP;i++) drawCard();
 
   if(newTerrain) drawBoard();
-  $('modeTag').textContent = setup.mode==='ai'
-    ? `AI 대전 · 나는 ${FACTIONS.find(f=>f.id===setup.myFaction).name}`
-    : '3인 플레이';
-  $('btnVeil').classList.toggle('hidden', setup.mode!=='local');
+  /* 온라인이면 참가자들에게 같은 지형을 먼저 내려보낸다 */
+  if(net.role==='host' && net.started){
+    const terrain=encodeTerrain();
+    for(const c of net.conns) netSend(c,{type:'init', terrain, kinds:net.kinds, seat:c.__seat});
+  }
+  syncChrome();
   log('<b class="hi">새 게임을 시작합니다.</b> 해적 → 산적 → 도적 순서로 진행합니다.');
   setMode('move');
   maybeAI();
+}
+
+/* 헤더/버튼 표시를 현재 모드에 맞춘다 */
+function syncChrome(){
+  $('modeTag').textContent =
+    net.on ? `온라인 · 나는 ${FDEF(net.seat).name}${net.role==='host'?' (방장)':''}`
+    : setup.mode==='ai' ? `AI 대전 · 나는 ${FDEF(setup.myFaction).name}`
+    : '3인 플레이';
+  $('btnVeil').classList.toggle('hidden', net.on || setup.mode!=='local');
+  $('roomChip').classList.toggle('hidden', !net.on);
+  $('roomChipCode').textContent = net.code||'';
+  const guest = net.role==='guest';
+  $('btnTerrain').disabled = guest;
+  $('btnRestart').disabled = guest;
 }
 
 /* 세 세력이 서로 가장 멀리 떨어지도록 시작 칸을 고른다 (후보는 각자의 고향 지형) */
@@ -709,10 +841,45 @@ function resolveEncounter(mover){
   return out;
 }
 
-/* ═══════════ 행동 ═══════════ */
-function setMode(m){
+/* ═══════════ 행동 — 입력 계층 ═══════════ */
+/* 내 입력은 언제나 이 문을 통과한다. 게스트면 호스트로 보내고, 아니면 바로 판정한다. */
+function myAction(act, to){
+  if(!isMyTurn()) return;
+  if(net.role==='guest'){ netSend(net.host, {type:'act', act, to}); S.mode=null; S.highlight=[]; render(); return; }
+  hostApply(myActorId(), {act, to});
+}
+
+/* 호스트(또는 로컬)에서의 규칙 판정 */
+function hostApply(seatId, m){
+  if(!S || S.over) return;
   const f=S.factions[S.turn];
-  if(S.over || S.left<=0 || isAI(f)){ S.mode=null; S.highlight=[]; render(); return; }
+  if(f.id!==seatId) return;                       // 남의 차례
+  if(m.act==='end'){ log('턴을 일찍 종료했습니다.'); endTurn(); return; }
+  if(S.left<=0) return;
+
+  if(m.act==='take'){ takeTreasure(); return; }
+
+  if(m.act==='move'){
+    const t=m.to && tiles.get(K(m.to.q,m.to.r));
+    if(!t) return;
+    if(!nbrs(tiles.get(K(f.pos.q,f.pos.r))).includes(t)) return;
+    doMove(t,false); return;
+  }
+  if(m.act==='power'){
+    const tg=powerTargets(f);
+    if(tg===null) return;
+    if(tg==='instant'){ useStealth(f); return; }
+    const t=m.to && tiles.get(K(m.to.q,m.to.r));
+    if(!t || !tg.includes(K(t.q,t.r))) return;
+    doMove(t,true); return;
+  }
+}
+
+/* 하이라이트 표시는 각자 화면에서만 계산한다 */
+function setMode(m){
+  if(!S) return;
+  const f=S.factions[S.turn];
+  if(!isMyTurn() || S.left<=0){ S.mode=null; S.highlight=[]; render(); return; }
   if(S.mode===m){ S.mode=null; S.highlight=[]; render(); return; }
   S.mode=m;
   if(m==='move'){
@@ -720,7 +887,7 @@ function setMode(m){
   }else if(m==='power'){
     const tg=powerTargets(f);
     if(tg===null){ S.mode=null; S.highlight=[]; }
-    else if(tg==='instant'){ S.mode=null; S.highlight=[]; useStealth(f); return; }
+    else if(tg==='instant'){ S.mode=null; S.highlight=[]; myAction('power'); return; }
     else S.highlight=tg;
   }
   render();
@@ -729,6 +896,7 @@ function setMode(m){
 /* null=불가 / 'instant'=즉시발동 / 배열=목표 칸 키 목록 */
 function powerTargets(f){
   const t=tiles.get(K(f.pos.q,f.pos.r));
+  if(!t) return null;
   if(f.id==='pirate'){
     if(t.terrain!=='sea') return null;
     const seen=new Map([[K(t.q,t.r),0]]), qq=[t], out=[];
@@ -768,10 +936,10 @@ function doMove(t, viaPower){
 }
 
 function onTileClick(t){
-  if(S.over || !S.mode) return;
-  if(isAI(S.factions[S.turn])) return;
+  if(!S || S.over || !S.mode) return;
+  if(!isMyTurn()) return;
   if(!S.highlight.includes(K(t.q,t.r))) return;
-  doMove(t, S.mode==='power');
+  myAction(S.mode==='power' ? 'power' : 'move', {q:t.q, r:t.r});
 }
 
 function takeTreasure(){
@@ -804,7 +972,7 @@ function spend(msg, secret, extra){
 }
 
 function endTurn(){
-  if(S.over){ render(); return; }
+  if(!S || S.over){ render(); return; }
   const f=S.factions[S.turn];
   if(f.hidden){
     f.hiddenTurns--;
@@ -817,7 +985,8 @@ function endTurn(){
   S.left=ACTIONS_PER_TURN; S.mode=null; S.highlight=[];
   const nx=S.factions[S.turn];
   log(`— ${nx.icon} <b>${nx.name}</b>의 차례 —`);
-  if(setup.mode==='local' && S.factions.some(x=>x.hidden)) showVeil(`${nx.icon} ${nx.name}의 차례입니다`);
+  if(!net.on && setup.mode==='local' && S.factions.some(x=>x.hidden))
+    showVeil(`${nx.icon} ${nx.name}의 차례입니다`);
   setMode('move');
   maybeAI();
 }
@@ -826,6 +995,12 @@ function gameOver(){
   S.over=true; S.mode=null; S.highlight=[];
   clearTimeout(aiTimer);
   S.factions.forEach(f=>{ f.hidden=false; f.lastKnown=K(f.pos.q,f.pos.r); });
+  log('<b class="warn">게임 오버</b> — 보물 더미가 바닥났습니다.');
+  render();
+  showResult();
+}
+
+function showResult(){
   const best=Math.max(...S.factions.map(score));
   const win=S.factions.filter(f=>score(f)===best);
   $('overBody').innerHTML =
@@ -839,15 +1014,13 @@ function gameOver(){
     + `<div style="margin-top:var(--sp-4);font-weight:900;font-size:var(--fs-xl)">
          🏆 ${win.map(f=>f.name).join(' · ')} ${win.length>1?'공동 승리!':'승리!'}</div>`;
   $('over').classList.add('show');
-  log('<b class="warn">게임 오버</b> — 보물 더미가 바닥났습니다.');
-  render();
 }
 
 function showVeil(msg){ $('veilMsg').textContent=msg; $('veil').classList.add('show'); }
 
-/* ═══════════ AI ═══════════ */
+/* ═══════════ AI (호스트/로컬에서만 실행) ═══════════ */
 function maybeAI(){
-  if(S.over) return;
+  if(!S || S.over || net.role==='guest') return;
   if(isAI(S.factions[S.turn])){ render(); aiTimer=setTimeout(aiStep, AI_DELAY); }
 }
 
@@ -905,7 +1078,7 @@ function aiChoose(f){
 }
 
 function aiStep(){
-  if(S.over) return;
+  if(!S || S.over || net.role==='guest') return;
   const f=S.factions[S.turn];
   if(!isAI(f)) return;
   if(S.left<=0){ endTurn(); return; }
@@ -916,6 +1089,165 @@ function aiStep(){
   else { log(`${f.icon} <b>${f.name}</b>이(가) 턴을 마쳤습니다.`); endTurn(); }
 }
 
+/* ═══════════════════════════════════════════════════
+   온라인 멀티 — PeerJS (호스트 권한 방식)
+   호스트가 규칙을 판정하고 사람마다 다른 스냅샷을 보낸다.
+   ═══════════════════════════════════════════════════ */
+function makeCode(){
+  const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   // 헷갈리는 O/0/I/1 제외
+  return Array.from({length:6},()=>A[rnd(A.length)]).join('');
+}
+function netSend(conn, msg){ try{ if(conn && conn.open) conn.send(msg); }catch(e){} }
+function netMsg(t){ $('netMsg').innerHTML=t; }
+
+/* ── 스냅샷 ── */
+function snapshotFor(seat){
+  return {
+    type:'state', turn:S.turn, left:S.left, taken:S.taken,
+    deckN:S.deck.length, over:S.over, log:S.log.slice(0,50),
+    faceUp:S.faceUp.map(c=>({id:c.id,name:c.name,value:c.value,at:c.at})),
+    factions:S.factions.map(f=>{
+      const hide = f.hidden && f.id!==seat;          // 은신 중인 남의 말은 위치 자체를 안 보낸다
+      const p = hide ? parseKey(f.lastKnown) : {q:f.pos.q, r:f.pos.r};
+      return {id:f.id, pos:p, hidden:f.hidden, lastKnown:f.lastKnown,
+              loot:f.loot.map(c=>({id:c.id,name:c.name,value:c.value}))};
+    })
+  };
+}
+function broadcastState(){
+  for(const c of net.conns) netSend(c, snapshotFor(c.__seat));
+}
+
+function applyState(st){
+  const wasOver=S && S.over;
+  S = {
+    factions: st.factions.map(x=>({...FDEF(x.id), ...x, hiddenTurns:0, masked:false})),
+    turn:st.turn, left:st.left, mode:null, highlight:[],
+    deck:new Array(st.deckN), faceUp:st.faceUp, taken:st.taken,
+    log:st.log, over:st.over
+  };
+  if(isMyTurn()) setMode('move'); else render();
+  if(S.over && !wasOver) showResult();
+}
+
+/* ── 호스트 ── */
+function hostRoom(){
+  if(typeof Peer==='undefined'){ netMsg('⚠️ 네트워크 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.'); return; }
+  const code=makeCode();
+  netMsg('방을 여는 중…');
+  const peer=new Peer(ROOM_PREFIX+code, {debug:0});
+  net.peer=peer;
+
+  peer.on('open', ()=>{
+    net.role='host'; net.code=code; net.seat=setup.myFaction;
+    net.owners={pirate:'ai', bandit:'ai', thief:'ai'};
+    net.owners[net.seat]='me';
+    $('netIdle').classList.add('hidden');
+    $('netRoom').classList.remove('hidden');
+    $('startGo').classList.remove('hidden');       // 방장은 여기서 시작한다
+    $('roomCode').textContent=code;
+    netMsg('친구에게 코드를 알려주세요. 빈 자리는 AI가 맡습니다.');
+    renderLobby();
+  });
+
+  peer.on('connection', conn=>{
+    conn.on('open', ()=>{
+      const free=FACTIONS.map(f=>f.id).find(id=>net.owners[id]==='ai');
+      if(!free || net.started){ netSend(conn,{type:'full'}); setTimeout(()=>conn.close(),300); return; }
+      net.owners[free]=conn.peer; conn.__seat=free; net.conns.push(conn);
+      netSend(conn,{type:'welcome', seat:free, code:net.code, kinds:kindsMap()});
+      broadcastLobby(); renderLobby();
+    });
+    conn.on('data', d=>{ if(d && d.type==='act') hostApply(conn.__seat, d); });
+    conn.on('close', ()=>{
+      if(!conn.__seat) return;
+      net.owners[conn.__seat]='ai';
+      net.conns=net.conns.filter(c=>c!==conn);
+      if(S && net.started){ log(`🔌 <b>${FDEF(conn.__seat).name}</b> 플레이어의 연결이 끊겨 AI가 이어받습니다.`); render(); maybeAI(); }
+      broadcastLobby(); renderLobby();
+    });
+  });
+
+  peer.on('error', e=>{
+    if(e.type==='unavailable-id'){ peer.destroy(); hostRoom(); return; }   // 코드 충돌 — 다시
+    netMsg('⚠️ 연결 오류: '+e.type);
+  });
+}
+
+const kindsMap = () => {
+  const k={}; FACTIONS.forEach(f=> k[f.id] = net.owners[f.id]==='ai' ? 'ai' : 'human'); return k;
+};
+function broadcastLobby(){
+  for(const c of net.conns) netSend(c,{type:'lobby', kinds:kindsMap(), seat:c.__seat});
+}
+
+/* ── 게스트 ── */
+function joinRoom(code){
+  if(typeof Peer==='undefined'){ netMsg('⚠️ 네트워크 라이브러리를 불러오지 못했습니다.'); return; }
+  netMsg('방에 접속하는 중…');
+  const peer=new Peer({debug:0});
+  net.peer=peer;
+  peer.on('open', ()=>{
+    const conn=peer.connect(ROOM_PREFIX+code, {reliable:true});
+    net.host=conn;
+    conn.on('open', ()=>{ net.role='guest'; net.code=code; netSend(conn,{type:'hello'}); });
+    conn.on('data', d=>onGuestData(d));
+    conn.on('close', ()=>{ if(net.started){ $('lost').classList.add('show'); } });
+  });
+  peer.on('error', e=>{
+    netMsg(e.type==='peer-unavailable'
+      ? '⚠️ 그런 방이 없습니다. 코드를 확인해 주세요.'
+      : '⚠️ 연결 오류: '+e.type);
+  });
+}
+
+function onGuestData(d){
+  if(!d) return;
+  if(d.type==='full'){ netMsg('⚠️ 방이 가득 찼습니다.'); return; }
+  if(d.type==='welcome'){
+    net.seat=d.seat; net.kinds=d.kinds; net.code=d.code;
+    $('netIdle').classList.add('hidden');
+    $('netRoom').classList.remove('hidden');
+    $('roomCode').textContent=d.code;
+    $('startGo').classList.add('hidden');
+    netMsg(`당신은 <b>${FDEF(d.seat).name}</b>입니다. 방장이 시작하기를 기다리는 중…`);
+    renderLobby(); return;
+  }
+  if(d.type==='lobby'){ net.kinds=d.kinds; net.seat=d.seat; renderLobby(); return; }
+  if(d.type==='init'){
+    net.on=true; net.started=true; net.kinds=d.kinds;
+    decodeTerrain(d.terrain); drawBoard();
+    S={factions:[],turn:0,left:3,mode:null,highlight:[],deck:[],faceUp:[],taken:0,log:[],over:false};
+    $('start').classList.remove('show');
+    syncChrome();
+    return;
+  }
+  if(d.type==='state'){ applyState(d); return; }
+  if(d.type==='bye'){ $('lost').classList.add('show'); return; }
+}
+
+/* ── 로비 표시 ── */
+function renderLobby(){
+  const seatOf = id => net.role==='host'
+    ? (net.owners[id]==='me' ? '나 (방장)' : net.owners[id]==='ai' ? '비어 있음 → AI' : '온라인 플레이어')
+    : (id===net.seat ? '나' : net.kinds[id]==='ai' ? '비어 있음 → AI' : '온라인 플레이어');
+  $('plist').innerHTML = FACTIONS.map(f=>{
+    const live = net.role==='host' ? net.owners[f.id]!=='ai' : (f.id===net.seat || net.kinds[f.id]==='human');
+    return `<div class="prow">
+      <div class="avatar" style="width:24px;height:24px;border-radius:7px;font-size:12px;background:${f.color}">${f.icon}</div>
+      <div>${f.name}</div><div class="st ${live?'live':''}">${seatOf(f.id)}</div></div>`;
+  }).join('');
+}
+
+/* 호스트가 게임을 시작한다 */
+function hostStart(){
+  net.on=true; net.started=true;
+  net.kinds=kindsMap();
+  $('start').classList.remove('show');
+  newGame(true);            // 지형 생성 → 참가자에게 init 전송 → 첫 스냅샷 방송
+  render();
+}
+
 /* ═══════════ 시작 화면 ═══════════ */
 $('picks').innerHTML = FACTIONS.map(f=>
   `<div class="pick${f.id==='pirate'?' on':''}" data-f="${f.id}">
@@ -923,29 +1255,70 @@ $('picks').innerHTML = FACTIONS.map(f=>
      <div class="s">${TERRAIN[f.home].name} · ${f.power}</div></div>`).join('');
 
 document.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+  if(net.role) return;                                   // 이미 방에 들어간 뒤에는 잠금
   document.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
   el.classList.add('on');
   setup.mode=el.dataset.mode;
-  $('pickWrap').classList.toggle('hidden', setup.mode!=='ai');
+  $('pickWrap').classList.toggle('hidden', setup.mode==='local');
+  $('netWrap').classList.toggle('hidden', setup.mode!=='online');
+  $('startGo').classList.toggle('hidden', setup.mode==='online');
 });
 document.querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
+  if(net.role) return;
   document.querySelectorAll('.pick').forEach(x=>x.classList.remove('on'));
   el.classList.add('on');
   setup.myFaction=el.dataset.f;
 });
-$('startGo').onclick = ()=>{ $('start').classList.remove('show'); newGame(true); render(); };
+
+$('startGo').onclick = ()=>{
+  if(setup.mode==='online'){ if(net.role==='host') hostStart(); return; }
+  net.on=false; net.role=null; net.seat=null;
+  $('start').classList.remove('show');
+  newGame(true); render();
+};
+$('netHost').onclick = hostRoom;
+$('netJoin').onclick = ()=>{
+  const code=$('netCode').value.trim().toUpperCase();
+  if(code.length<4){ netMsg('⚠️ 코드를 입력해 주세요.'); return; }
+  joinRoom(code);
+};
+$('netCode').addEventListener('keydown', e=>{ if(e.key==='Enter') $('netJoin').click(); });
+$('copyCode').onclick = ()=>{
+  navigator.clipboard?.writeText(net.code||'').then(
+    ()=>netMsg('✅ 코드를 복사했습니다.'),
+    ()=>netMsg('코드를 직접 알려주세요: '+net.code));
+};
 
 /* ═══════════ 이벤트 ═══════════ */
 $('aMove').onclick  = ()=>setMode('move');
 $('aPower').onclick = ()=>setMode('power');
-$('aTake').onclick  = takeTreasure;
-$('aEnd').onclick   = ()=>{ log('턴을 일찍 종료했습니다.'); endTurn(); };
-$('btnTerrain').onclick = ()=>{ newGame(true);  render(); };
-$('btnRestart').onclick = ()=>{ newGame(false); render(); };
+$('aTake').onclick  = ()=>myAction('take');
+$('aEnd').onclick   = ()=>myAction('end');
+$('btnTerrain').onclick = ()=>{ if(net.role==='guest') return; newGame(true);  render(); };
+$('btnRestart').onclick = ()=>{ if(net.role==='guest') return; newGame(false); render(); };
 $('btnVeil').onclick    = ()=>showVeil('화면을 가렸습니다');
-$('btnNew').onclick     = ()=>{ clearTimeout(aiTimer); $('over').classList.remove('show'); $('start').classList.add('show'); };
+$('btnNew').onclick     = ()=>{ leaveRoom(); $('over').classList.remove('show'); $('start').classList.add('show'); };
 $('veilOk').onclick     = ()=>$('veil').classList.remove('show');
-$('overOk').onclick     = ()=>{ $('over').classList.remove('show'); $('start').classList.add('show'); };
+$('overOk').onclick     = ()=>{
+  $('over').classList.remove('show');
+  if(net.role==='host'){ newGame(true); render(); return; }   // 방장은 같은 방에서 새 판
+  if(net.role==='guest') return;                              // 게스트는 방장을 기다린다
+  $('start').classList.add('show');
+};
+$('lostOk').onclick     = ()=>{ $('lost').classList.remove('show'); leaveRoom(); $('start').classList.add('show'); };
+
+function leaveRoom(){
+  clearTimeout(aiTimer);
+  if(net.role==='host') for(const c of net.conns) netSend(c,{type:'bye'});
+  try{ net.peer && net.peer.destroy(); }catch(e){}
+  net = {on:false, role:null, peer:null, code:null, conns:[], host:null,
+         seat:null, owners:{}, kinds:{}, started:false};
+  $('netIdle').classList.remove('hidden');
+  $('netRoom').classList.add('hidden');
+  $('startGo').classList.remove('hidden');
+  netMsg('');
+  syncChrome();
+}
 
 /* 시작 화면 뒤에 깔릴 초기 보드 */
 generateTerrain();
