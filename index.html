@@ -390,7 +390,9 @@ details ul{padding-left:18px; margin:var(--sp-2) 0}
             <ul>
               <li>해적 / 바다 — 이어진 물길을 따라 최대 4칸</li>
               <li>산적 / 산 봉우리 ▲ — 집라인으로 다른 봉우리로</li>
-              <li>도적 / 도시 — 은신, 다음 자기 턴이 끝날 때까지 위치 비공개</li>
+              <li>도적 / 도시 — <b>은신 + 질주</b>. 능력을 쓴 자리만 남기고 사라지며,
+                  다음 이동 1회는 <b>2칸</b>까지 갑니다. 진짜 위치는 내 차례가 두 번 시작한 뒤에 드러나고,
+                  그전에 다시 쓰면 새로 쓴 자리가 공개 위치가 됩니다.</li>
             </ul>
           </li>
           <li><b>획득</b> — 보물 칸에서. 카드를 가져오고 더미에서 1장이 새 위치에 공개됩니다.</li>
@@ -454,7 +456,7 @@ const TERRAIN_ORDER = ['sea','mountain','city','plain'];
 const FACTIONS = [
   {id:'pirate', name:'해적', icon:'🏴‍☠️', color:'#0B2A33', home:'sea',      power:'물길 타기'},
   {id:'bandit', name:'산적', icon:'🪓',   color:'#7A4A22', home:'mountain', power:'집라인'},
-  {id:'thief',  name:'도적', icon:'🗡️',  color:'#6D3FA8', home:'city',     power:'은신'}
+  {id:'thief',  name:'도적', icon:'🗡️',  color:'#6D3FA8', home:'city',     power:'은신 + 질주'}
 ];
 const FDEF = id => FACTIONS.find(f=>f.id===id);
 
@@ -664,9 +666,10 @@ function renderPanel(){
   $('tAvatar').style.background = f.color;
   $('tName').textContent = `${f.name}의 차례${ai?' (AI)':''}${net.on&&f.id===net.seat?' · 나':''}`;
   const t = tiles.get(K(f.pos.q,f.pos.r));
+  const extra = (f.hidden?' · 은신 중':'') + (f.dash?' · 질주 대기':'');
   $('tWhere').textContent = f.masked
     ? '위치 비공개 · 은신 중'
-    : `(${t.q}, ${t.r}) · ${TERRAIN[t.terrain].name}${t.peak?' ▲':''}${f.hidden?' · 은신 중':''}`;
+    : `(${t.q}, ${t.r}) · ${TERRAIN[t.terrain].name}${t.peak?' ▲':''}${extra}`;
 
   const pips=$('pips'); pips.innerHTML='';
   for(let i=0;i<ACTIONS_PER_TURN;i++){
@@ -687,7 +690,9 @@ function renderPanel(){
   if(S.over) h='게임이 끝났습니다.';
   else if(ai) h='AI가 생각하는 중…';
   else if(!mine) h=`${f.name} 플레이어의 차례를 기다리는 중…`;
-  else if(S.mode==='move')  h='흰 테두리로 표시된 인접 칸을 클릭해 이동하세요.';
+  else if(S.mode==='move')  h = f.dash
+      ? '질주 — 흰 테두리 안의 2칸 이내 아무 칸으로 갈 수 있습니다. (행동 1개)'
+      : '흰 테두리로 표시된 인접 칸을 클릭해 이동하세요.';
   else if(S.mode==='power') h = f.id==='pirate'
       ? `물길을 따라 이어진 바다 칸(최대 ${WATER_RANGE}칸)으로 이동합니다.`
       : '집라인으로 건너갈 다른 봉우리 ▲ 를 클릭하세요.';
@@ -742,7 +747,7 @@ function newGame(newTerrain){
   FACTIONS.forEach((def,i)=>{
     const s = starts[i];
     S.factions.push({...def, pos:{q:s.q,r:s.r}, loot:[], hidden:false, hiddenTurns:0,
-                     masked:false, lastKnown:K(s.q,s.r)});
+                     dash:false, masked:false, lastKnown:K(s.q,s.r)});
   });
 
   S.deck = shuffle(Array.from({length:DECK_SIZE},(_,i)=>({
@@ -862,7 +867,8 @@ function hostApply(seatId, m){
   if(m.act==='move'){
     const t=m.to && tiles.get(K(m.to.q,m.to.r));
     if(!t) return;
-    if(!nbrs(tiles.get(K(f.pos.q,f.pos.r))).includes(t)) return;
+    const d=hexDist(f.pos,t);
+    if(d<1 || d>moveRange(f)) return;
     doMove(t,false); return;
   }
   if(m.act==='power'){
@@ -883,7 +889,10 @@ function setMode(m){
   if(S.mode===m){ S.mode=null; S.highlight=[]; render(); return; }
   S.mode=m;
   if(m==='move'){
-    S.highlight = nbrs(tiles.get(K(f.pos.q,f.pos.r))).map(t=>K(t.q,t.r));
+    const R=moveRange(f);
+    S.highlight = [...tiles.values()]
+      .filter(t=>{ const d=hexDist(f.pos,t); return d>=1 && d<=R; })
+      .map(t=>K(t.q,t.r));
   }else if(m==='power'){
     const tg=powerTargets(f);
     if(tg===null){ S.mode=null; S.highlight=[]; }
@@ -920,16 +929,28 @@ function powerTargets(f){
   return null;
 }
 
+/* 도적의 능력 — 은신 + 다음 이동 1회를 2칸으로
+   공개되는 위치는 “능력을 쓴 그 자리”이고, 내 차례 시작이 2번 지나야 진짜 위치가 드러난다.
+   중간에 다시 쓰면 새로 쓴 자리가 공개 위치가 되고 시계도 다시 감긴다. */
 function useStealth(f){
-  f.hidden=true; f.hiddenTurns=2;                  // 이번 턴 끝 + 다음 자기 턴 끝까지
+  f.hidden=true; f.hiddenTurns=2;
   f.lastKnown=K(f.pos.q,f.pos.r);
-  spend(`${f.icon} <b>${f.name}</b>이(가) 도시에서 <b class="hi">은신</b>했습니다 — 위치 비공개.`);
+  f.dash=true;
+  spend(`${f.icon} <b>${f.name}</b>이(가) 도시에서 <b class="hi">은신</b>했습니다 — `
+      + `(${f.pos.q}, ${f.pos.r})만 남기고 사라졌으며 다음 이동은 <b class="hi">2칸</b>입니다.`);
 }
+
+/* 이번 이동으로 갈 수 있는 최대 칸수 */
+const moveRange = f => f.dash ? 2 : 1;
 
 function doMove(t, viaPower){
   const f=S.factions[S.turn];
+  const dist=hexDist(f.pos,t);
+  const dashed = !viaPower && f.dash && dist>1;
+  if(!viaPower) f.dash=false;               // 능력으로 얻은 질주는 이동 1회에만 쓴다
   f.pos={q:t.q,r:t.r};
-  const how = !viaPower ? '이동' : (f.id==='pirate' ? '물길을 타고 이동' : '집라인으로 이동');
+  const how = viaPower ? (f.id==='pirate' ? '물길을 타고 이동' : '집라인으로 이동')
+            : dashed ? '질주로 2칸 이동' : '이동';
   const msg = `${f.icon} <b>${f.name}</b> ${how} → (${t.q}, ${t.r}) ${TERRAIN[t.terrain].name}`;
   const enc = resolveEncounter(f);          // 조우가 있으면 은신이 풀릴 수 있다
   spend(msg, f.hidden, enc);                // 여전히 은신 중이면 이동 내용은 비공개
@@ -973,17 +994,18 @@ function spend(msg, secret, extra){
 
 function endTurn(){
   if(!S || S.over){ render(); return; }
-  const f=S.factions[S.turn];
-  if(f.hidden){
-    f.hiddenTurns--;
-    if(f.hiddenTurns<=0){
-      f.hidden=false; f.lastKnown=K(f.pos.q,f.pos.r);
-      log(`👁️ <b>${f.name}</b>의 은신이 풀렸습니다 → (${f.pos.q}, ${f.pos.r})`);
-    }
-  }
   S.turn=(S.turn+1)%S.factions.length;
   S.left=ACTIONS_PER_TURN; S.mode=null; S.highlight=[];
   const nx=S.factions[S.turn];
+  /* 은신 시계는 자기 차례가 시작할 때 한 칸씩 돈다 —
+     1번 차례에 걸면 2번 차례까지 그 자리가 남고 3번 차례에 진짜 위치가 드러난다 */
+  if(nx.hidden){
+    nx.hiddenTurns--;
+    if(nx.hiddenTurns<=0){
+      nx.hidden=false; nx.lastKnown=K(nx.pos.q,nx.pos.r);
+      log(`👁️ <b>${nx.name}</b>의 은신이 풀렸습니다 → (${nx.pos.q}, ${nx.pos.r})`);
+    }
+  }
   log(`— ${nx.icon} <b>${nx.name}</b>의 차례 —`);
   if(!net.on && setup.mode==='local' && S.factions.some(x=>x.hidden))
     showVeil(`${nx.icon} ${nx.name}의 차례입니다`);
@@ -1068,11 +1090,16 @@ function aiChoose(f){
     let bt=null, bd=dNow;
     for(const k of pw){ const t=tiles.get(k), d=hexDist(t,goal); if(d<bd){ bd=d; bt=t; } }
     if(bt && dNow-bd>=2) return {act:'power', to:bt};
-  }else if(pw==='instant' && !f.hidden && f.loot.length>=1){
-    return {act:'power'};                          // 보물을 지고 있으면 은신
+  }else if(pw==='instant' && !f.dash && (f.loot.length>=1 || dNow>=3)){
+    return {act:'power'};                          // 은신 + 다음 이동 2칸은 거의 언제나 이득
   }
 
-  // 4) 가장 가까운 보물 쪽으로 한 칸
+  // 4) 가장 가까운 보물 쪽으로 — 질주가 있으면 2칸까지
+  if(f.dash){
+    const reach=[...tiles.values()].filter(t=>{const d=hexDist(f.pos,t); return d>=1 && d<=2;});
+    const best=reach.reduce((a,b)=> hexDist(a,goal)<=hexDist(b,goal)?a:b, reach[0]);
+    if(best && hexDist(best,goal)<dNow) return {act:'move', to:best};
+  }
   const step=bfsStep(myTile,targets);
   return step ? {act:'move', to:step} : {act:'end'};
 }
@@ -1109,7 +1136,7 @@ function snapshotFor(seat){
     factions:S.factions.map(f=>{
       const hide = f.hidden && f.id!==seat;          // 은신 중인 남의 말은 위치 자체를 안 보낸다
       const p = hide ? parseKey(f.lastKnown) : {q:f.pos.q, r:f.pos.r};
-      return {id:f.id, pos:p, hidden:f.hidden, lastKnown:f.lastKnown,
+      return {id:f.id, pos:p, hidden:f.hidden, dash:f.dash, lastKnown:f.lastKnown,
               loot:f.loot.map(c=>({id:c.id,name:c.name,value:c.value}))};
     })
   };
