@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TREASURE HUNT — 해적 · 산적 · 도적</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Treasure Hunt
+   Typeface : Inter (Regular 400 / Medium 500 / Semibold 600 / Black 900)
+   Colours  : #00B8B8 · #064A57 · #000000 · #FFFFFF
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  /* — brand — */
+  --brand:#00B8B8;
+  --brand-700:#0E9A9A;
+  --brand-300:#5FD8D8;
+  --brand-wash:rgba(0,184,184,.16);
+  --deep:#064A57;
+  --deep-700:#04343E;
+  --deep-900:#022128;
+  --white:#FFFFFF;
+  --black:#000000;
+
+  /* — ink — */
+  --ink:#FFFFFF;
+  --ink-70:rgba(255,255,255,.72);
+  --ink-50:rgba(255,255,255,.50);
+  --ink-30:rgba(255,255,255,.30);
+
+  /* — surface — */
+  --surface:rgba(255,255,255,.07);
+  --surface-2:rgba(255,255,255,.13);
+  --surface-3:rgba(255,255,255,.20);
+  --line:rgba(255,255,255,.14);
+  --line-strong:rgba(255,255,255,.28);
+
+  /* — terrain — */
+  --sea:#1E6FA8;
+  --mountain:#8A939B;
+  --city:#D14A43;
+  --plain:#E8C766;
+  --gold:#F5C451;
+
+  /* — factions — */
+  --pirate:#0B2A33;
+  --bandit:#7A4A22;
+  --thief:#6D3FA8;
+
+  /* — radius / space / elevation — */
+  --r-sm:10px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+  --elev-1:0 4px 14px rgba(0,0,0,.25);
+  --elev-2:0 12px 34px rgba(0,0,0,.38);
+  --glass:blur(16px) saturate(140%);
+
+  /* — type scale — */
+  --fs-2xs:10px; --fs-xs:11px; --fs-sm:12px; --fs-md:13px;
+  --fs-lg:15px; --fs-xl:20px; --fs-2xl:28px; --fs-3xl:40px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink);
+  font-family:'Inter','Pretendard','Malgun Gothic','Segoe UI',sans-serif;
+  font-size:var(--fs-md); font-weight:400; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  background:
+    radial-gradient(1200px 700px at 15% -10%, rgba(0,184,184,.28), transparent 60%),
+    radial-gradient(900px 600px at 110% 20%, rgba(0,184,184,.12), transparent 55%),
+    linear-gradient(160deg, var(--deep) 0%, var(--deep-700) 45%, var(--deep-900) 100%);
+  background-attachment:fixed;
+}
+
+/* ── type ── */
+h1,h2,h3{margin:0}
+.t-display{font-weight:900; font-size:var(--fs-3xl); letter-spacing:-.02em; line-height:1.1}
+.t-title{font-weight:900; font-size:var(--fs-xl); letter-spacing:-.01em}
+.t-label{font-weight:600; font-size:var(--fs-xs); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-50)}
+.t-body{font-weight:400; font-size:var(--fs-md); color:var(--ink-70)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ── button ── */
+button{
+  font:inherit; font-weight:600; cursor:pointer; color:var(--ink);
+  background:var(--surface-2); border:1px solid var(--line);
+  border-radius:var(--r-pill); padding:9px 16px;
+  transition:background .15s, border-color .15s, transform .08s, opacity .15s;
+}
+button:hover:not(:disabled){background:var(--surface-3); border-color:var(--line-strong)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.3; cursor:not-allowed}
+button.primary{background:var(--brand); border-color:var(--brand); color:var(--deep-900)}
+button.primary:hover:not(:disabled){background:var(--brand-300); border-color:var(--brand-300)}
+button.ghost{background:transparent}
+button.big{padding:13px 30px; font-size:var(--fs-lg); border-radius:var(--r-pill)}
+
+/* ── layout ── */
+header{
+  display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap;
+  padding:var(--sp-3) var(--sp-5);
+  background:rgba(2,33,40,.55); backdrop-filter:var(--glass);
+  border-bottom:1px solid var(--line); position:sticky; top:0; z-index:20;
+}
+.brandmark{display:flex; align-items:center; gap:var(--sp-2); margin-right:var(--sp-4)}
+.brandmark .dot{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--brand); color:var(--deep-900); font-size:16px; box-shadow:var(--elev-1)}
+.brandmark b{font-weight:900; letter-spacing:.06em; font-size:var(--fs-lg)}
+.brandmark span{color:var(--ink-50); font-size:var(--fs-sm); font-weight:500}
+.spacer{flex:1}
+
+main{display:flex; gap:var(--sp-4); padding:var(--sp-4) var(--sp-5) var(--sp-6); align-items:flex-start; flex-wrap:wrap}
+
+.panel{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r-lg); backdrop-filter:var(--glass); box-shadow:var(--elev-1);
+}
+#boardWrap{flex:1 1 640px; min-width:340px; padding:var(--sp-3); position:relative}
+svg#board{width:100%; height:auto; display:block; touch-action:manipulation}
+#hoverInfo{
+  position:absolute; left:var(--sp-5); bottom:var(--sp-4);
+  font-size:var(--fs-sm); font-weight:500; color:var(--ink-70);
+  background:rgba(2,33,40,.7); border:1px solid var(--line);
+  padding:6px 12px; border-radius:var(--r-pill); backdrop-filter:var(--glass);
+}
+aside{flex:0 0 340px; display:flex; flex-direction:column; gap:var(--sp-3)}
+.card{padding:var(--sp-4)}
+.card > .t-label{display:block; margin-bottom:var(--sp-3)}
+
+/* ── turn card ── */
+.turnhead{display:flex; align-items:center; gap:var(--sp-3)}
+.avatar{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;
+  border:1px solid var(--line-strong); box-shadow:var(--elev-1)}
+.turnhead .who{font-weight:900; font-size:var(--fs-lg); letter-spacing:-.01em}
+.turnhead .where{font-size:var(--fs-sm); color:var(--ink-50); font-weight:500}
+.pips{display:flex; gap:5px; margin-left:auto}
+.pip{width:12px;height:12px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line)}
+.pip.on{background:var(--brand); border-color:var(--brand); box-shadow:0 0 10px var(--brand-wash)}
+.acts{display:flex; gap:var(--sp-2); margin-top:var(--sp-4)}
+.acts button{flex:1; padding:11px 4px; border-radius:var(--r-md); font-size:var(--fs-md)}
+.acts button.on{background:var(--brand); border-color:var(--brand); color:var(--deep-900)}
+.hint{margin-top:var(--sp-3); font-size:var(--fs-sm); color:var(--ink-50); min-height:34px; line-height:1.5}
+
+/* ── scores ── */
+.srow{display:flex; align-items:center; gap:var(--sp-2); padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06)}
+.srow:last-child{border-bottom:none}
+.srow .nm{font-weight:600; font-size:var(--fs-md); width:64px}
+.srow .pts{margin-left:auto; font-weight:900; color:var(--brand); font-size:var(--fs-lg)}
+.chips{display:flex; gap:3px; flex-wrap:wrap; max-width:150px}
+.chip{width:19px;height:19px;border-radius:6px;display:grid;place-items:center;
+  font-size:var(--fs-2xs); font-weight:600; background:var(--surface-2); color:var(--ink-70)}
+.chip.mark{background:var(--gold); color:var(--deep-900); box-shadow:0 0 0 2px rgba(245,196,81,.3)}
+
+/* ── treasure list ── */
+.tre{display:flex; align-items:center; gap:var(--sp-2); padding:8px 10px; border-radius:var(--r-md);
+  cursor:pointer; border:1px solid transparent; transition:.15s}
+.tre:hover{background:var(--surface-2); border-color:var(--line)}
+.tre .nm{font-weight:500}
+.tre .v{color:var(--gold); font-weight:600; font-size:var(--fs-sm)}
+.tre .co{margin-left:auto; font-size:var(--fs-xs); color:var(--ink-50); font-weight:500}
+.meter{display:flex; justify-content:space-between; align-items:center; margin-top:var(--sp-3);
+  padding-top:var(--sp-3); border-top:1px solid var(--line); font-size:var(--fs-sm); color:var(--ink-50)}
+.meter b{font-weight:900; font-size:var(--fs-lg); color:var(--ink)}
+
+/* ── legend ── */
+.legend{display:flex; flex-wrap:wrap; gap:var(--sp-2) var(--sp-3); font-size:var(--fs-sm); color:var(--ink-70)}
+.legend span{display:flex; align-items:center; gap:6px}
+.legend i{width:13px;height:13px;border-radius:4px}
+
+/* ── log ── */
+#log{max-height:200px; overflow:auto; font-size:var(--fs-sm); color:var(--ink-50); line-height:1.7}
+#log > div{padding:3px 0; border-bottom:1px solid rgba(255,255,255,.05)}
+#log b{color:var(--ink); font-weight:600}
+#log .hi{color:var(--brand)}
+#log .warn{color:var(--gold)}
+
+/* ── rules ── */
+details{font-size:var(--fs-sm); color:var(--ink-50); line-height:1.75}
+summary{cursor:pointer; font-weight:600; color:var(--ink-70); font-size:var(--fs-md)}
+details ul{padding-left:18px; margin:var(--sp-2) 0}
+
+/* ── board ── */
+.hex{stroke:var(--deep-900); stroke-width:1; cursor:default; transition:filter .12s}
+.hex.hl{stroke:var(--white); stroke-width:2; filter:brightness(1.3)}
+.hex.hl2{stroke:var(--brand); stroke-width:2.5; filter:brightness(1.3)}
+.hex.sel{stroke:var(--white); stroke-width:2.5}
+.hex.flash{stroke:var(--gold); stroke-width:3.5}
+.clickable{cursor:pointer}
+
+/* ── overlays ── */
+.overlay{position:fixed; inset:0; z-index:60; display:none; place-items:center; padding:var(--sp-5);
+  background:rgba(2,33,40,.86); backdrop-filter:blur(18px)}
+.overlay.show{display:grid}
+.sheet{max-width:520px; width:100%; text-align:center; padding:var(--sp-6);
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--elev-2)}
+.opts{display:flex; gap:var(--sp-3); margin:var(--sp-5) 0}
+.opt{flex:1; padding:var(--sp-4); border-radius:var(--r-md); cursor:pointer; text-align:left;
+  background:var(--surface-2); border:1px solid var(--line); transition:.15s}
+.opt:hover{border-color:var(--line-strong)}
+.opt.on{border-color:var(--brand); background:var(--brand-wash); box-shadow:0 0 0 1px var(--brand)}
+.opt .h{font-weight:600; margin-bottom:2px}
+.opt .d{font-size:var(--fs-sm); color:var(--ink-50); line-height:1.45}
+.picks{display:flex; gap:var(--sp-2); margin-bottom:var(--sp-5)}
+.pick{flex:1; padding:var(--sp-3); border-radius:var(--r-md); cursor:pointer;
+  background:var(--surface-2); border:1px solid var(--line); transition:.15s}
+.pick:hover{border-color:var(--line-strong)}
+.pick.on{border-color:var(--brand); background:var(--brand-wash)}
+.pick .e{font-size:22px}
+.pick .n{font-weight:600; font-size:var(--fs-md); margin-top:2px}
+.pick .s{font-size:var(--fs-xs); color:var(--ink-50)}
+.hidden{display:none !important}
+
+@media(max-width:960px){ aside{flex:1 1 100%} header{padding:var(--sp-3)} main{padding:var(--sp-3)} }
+</style>
+</head>
+<body>
+
+<!-- ══════════ 시작 화면 ══════════ -->
+<div class="overlay show" id="start">
+  <div class="sheet">
+    <div class="t-label">Nickelfox · Board Edition</div>
+    <h1 class="t-display" style="margin:var(--sp-2) 0 var(--sp-2)">TREASURE HUNT</h1>
+    <p class="t-body">해적 · 산적 · 도적이 217칸의 거대 육각판에서 50장의 보물을 두고 겨룹니다.</p>
+
+    <div class="t-label" style="margin-top:var(--sp-5);text-align:left">플레이 방식</div>
+    <div class="opts">
+      <div class="opt on" data-mode="local">
+        <div class="h">3인 플레이</div>
+        <div class="d">한 화면에서 세 명이<br>번갈아 진행합니다.</div>
+      </div>
+      <div class="opt" data-mode="ai">
+        <div class="h">AI 대전</div>
+        <div class="d">한 세력을 맡고<br>나머지 둘은 AI가 조작합니다.</div>
+      </div>
+    </div>
+
+    <div id="pickWrap" class="hidden">
+      <div class="t-label" style="text-align:left">내가 맡을 세력</div>
+      <div class="picks" id="picks"></div>
+    </div>
+
+    <button class="primary big" id="startGo">게임 시작</button>
+  </div>
+</div>
+
+<!-- ══════════ 헤더 ══════════ -->
+<header>
+  <div class="brandmark">
+    <div class="dot">💎</div>
+    <div>
+      <b>TREASURE HUNT</b><br>
+      <span id="modeTag">3인 플레이</span>
+    </div>
+  </div>
+  <button id="btnTerrain">🎲 지형 바꾸기</button>
+  <button id="btnRestart" class="ghost">↺ 같은 지형으로 재시작</button>
+  <button id="btnVeil" class="ghost">🙈 화면 가리기</button>
+  <div class="spacer"></div>
+  <button id="btnNew" class="ghost">⇱ 시작 화면</button>
+</header>
+
+<!-- ══════════ 본문 ══════════ -->
+<main>
+  <section class="panel" id="boardWrap">
+    <svg id="board" preserveAspectRatio="xMidYMid meet"></svg>
+    <div id="hoverInfo">칸에 마우스를 올리면 좌표가 표시됩니다</div>
+  </section>
+
+  <aside>
+    <div class="panel card">
+      <div class="turnhead">
+        <div class="avatar" id="tAvatar"></div>
+        <div>
+          <div class="who" id="tName"></div>
+          <div class="where" id="tWhere"></div>
+        </div>
+        <div class="pips" id="pips"></div>
+      </div>
+      <div class="acts">
+        <button id="aMove">① 이동</button>
+        <button id="aPower">② 능력</button>
+        <button id="aTake">③ 획득</button>
+      </div>
+      <div class="acts">
+        <button id="aEnd" class="ghost" style="flex:1">턴 종료</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+
+    <div class="panel card">
+      <span class="t-label">보유 보물 · 점수</span>
+      <div id="scores"></div>
+      <div style="margin-top:var(--sp-2);font-size:var(--fs-xs);color:var(--ink-30)">
+        ◆ 표시된 카드가 약탈당하는 “중간 값어치” 보물입니다
+      </div>
+    </div>
+
+    <div class="panel card">
+      <span class="t-label">공개된 보물 (4)</span>
+      <div id="faceup"></div>
+      <div class="meter"><span>남은 더미</span><b class="num" id="deckN">50</b></div>
+      <div class="meter" style="border-top:none;padding-top:0;margin-top:var(--sp-1)">
+        <span>회수된 보물</span><b class="num" id="takenN">0</b>
+      </div>
+    </div>
+
+    <div class="panel card">
+      <span class="t-label">지형</span>
+      <div class="legend">
+        <span><i style="background:var(--sea)"></i>바다 · 해적</span>
+        <span><i style="background:var(--mountain)"></i>산 · 산적</span>
+        <span><i style="background:var(--city)"></i>도시 · 도적</span>
+        <span><i style="background:var(--plain)"></i>평야 · 중립</span>
+        <span>▲ 산 봉우리</span>
+      </div>
+    </div>
+
+    <div class="panel card">
+      <span class="t-label">기록</span>
+      <div id="log"></div>
+    </div>
+
+    <div class="panel card">
+      <details>
+        <summary>규칙 보기</summary>
+        <ul>
+          <li>거대 육각판은 한 변이 작은 육각 9칸(총 217칸)입니다.</li>
+          <li>한 턴에 <b>행동 3개</b>를 자유롭게 조합합니다. (이동 3번 = 3칸 이동)</li>
+          <li><b>이동</b> — 인접한 한 칸으로.</li>
+          <li><b>능력</b> — 자기 지형 위에서만.
+            <ul>
+              <li>해적 / 바다 — 이어진 물길을 따라 최대 4칸</li>
+              <li>산적 / 산 봉우리 ▲ — 집라인으로 다른 봉우리로</li>
+              <li>도적 / 도시 — 은신, 다음 자기 턴이 끝날 때까지 위치 비공개</li>
+            </ul>
+          </li>
+          <li><b>획득</b> — 보물 칸에서. 카드를 가져오고 더미에서 1장이 새 위치에 공개됩니다.</li>
+          <li><b>약탈</b> — 같은 칸에서 조우하면 그 <b>지형의 주인 세력</b>이 우세를 잡고, 상대에게서
+              가장 비싼 것도 가장 싼 것도 아닌 <b>중간 값어치</b> 보물 1장을 빼앗습니다.
+              평야이거나 지형 주인이 없으면 약탈은 일어나지 않습니다.</li>
+          <li>더미가 <b>바닥나는 순간 게임 오버</b>, 점수 합계가 가장 높은 세력이 승리합니다.</li>
+        </ul>
+      </details>
+    </div>
+  </aside>
+</main>
+
+<!-- ══════════ 가림막 / 결과 ══════════ -->
+<div class="overlay" id="veil">
+  <div class="sheet">
+    <div style="font-size:44px">🙈</div>
+    <h2 class="t-title" id="veilMsg" style="margin:var(--sp-3) 0">다음 플레이어에게 넘기세요</h2>
+    <p class="t-body">다른 플레이어는 화면을 보지 마세요.</p>
+    <button class="primary big" id="veilOk" style="margin-top:var(--sp-4)">확인</button>
+  </div>
+</div>
+
+<div class="overlay" id="over">
+  <div class="sheet">
+    <div class="t-label">Game Over</div>
+    <h2 class="t-display" style="margin:var(--sp-2) 0 var(--sp-4)">게임 오버</h2>
+    <div id="overBody"></div>
+    <button class="primary big" id="overOk" style="margin-top:var(--sp-5)">새 게임</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════ 설정값 ═══════════ */
+const RADIUS = 8;                 // 한 변 9칸 => 3*9*8+1 = 217칸
+const SIZE   = 22;                // 작은 육각 반지름(px)
+const DIRS   = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+const WATER_RANGE = 4;            // 해적 물길 최대 이동
+const ACTIONS_PER_TURN = 3;
+const DECK_SIZE = 50, FACEUP = 4;
+const AI_DELAY = 700;
+
+const TERRAIN = {
+  sea:      {name:'바다', fill:'#1E6FA8'},
+  mountain: {name:'산',   fill:'#8A939B'},
+  city:     {name:'도시', fill:'#D14A43'},
+  plain:    {name:'평야', fill:'#E8C766'}
+};
+
+const FACTIONS = [
+  {id:'pirate', name:'해적', icon:'🏴‍☠️', color:'#0B2A33', home:'sea',      power:'물길 타기'},
+  {id:'bandit', name:'산적', icon:'🪓',   color:'#7A4A22', home:'mountain', power:'집라인'},
+  {id:'thief',  name:'도적', icon:'🗡️',  color:'#6D3FA8', home:'city',     power:'은신'}
+];
+
+const TREASURE_NAMES = ['금괴','보석 상자','고대 유물','진주 목걸이','황금 왕관','은화 주머니',
+  '향신료 궤','해도 조각','성배','루비 반지','상아 조각상','비단 두루마리','호박 원석','금화 자루'];
+
+/* ═══════════ 유틸 ═══════════ */
+const K    = (q,r)=> q+','+r;
+const rnd  = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+const $    = id => document.getElementById(id);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];} return a; }
+function hexDist(a,b){ const dq=a.q-b.q, dr=a.r-b.r; return (Math.abs(dq)+Math.abs(dq+dr)+Math.abs(dr))/2; }
+function svgEl(tag,attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+
+/* ═══════════ 상태 ═══════════ */
+let tiles = new Map();
+let S = null;
+let aiTimer = null;
+let setup = { mode:'local', myFaction:'pirate' };
+
+/* ═══════════ 판 생성 ═══════════ */
+function buildTiles(){
+  tiles = new Map();
+  for(let q=-RADIUS;q<=RADIUS;q++){
+    const lo=Math.max(-RADIUS,-q-RADIUS), hi=Math.min(RADIUS,-q+RADIUS);
+    for(let r=lo;r<=hi;r++){
+      tiles.set(K(q,r), {q,r,
+        x:SIZE*Math.sqrt(3)*(q + r/2),
+        y:SIZE*1.5*r,
+        terrain:'plain', peak:false});
+    }
+  }
+}
+const nbrs = t => DIRS.map(([dq,dr])=>tiles.get(K(t.q+dq,t.r+dr))).filter(Boolean);
+
+/* 씨앗을 판 전체에 흩뿌린 뒤 넓혀 지형을 고르게 랜덤 분배한다 */
+function growRegion(kind, count, seedCount, minSeedDist){
+  const seeds=[]; let guard=0;
+  while(seeds.length<seedCount && guard++<800){
+    const t = pick([...tiles.values()].filter(t=>t.terrain==='plain'));
+    if(!t) break;
+    if(seeds.every(s=>hexDist(s,t)>=minSeedDist)){ t.terrain=kind; seeds.push(t); }
+  }
+  const regions = seeds.map(s=>[s]);
+  let placed = seeds.length, fail=0;
+  while(placed<count && fail<200 && regions.length){
+    const reg = pick(regions), cands=[];
+    for(const t of reg) for(const n of nbrs(t)) if(n.terrain==='plain') cands.push(n);
+    if(!cands.length){ fail++; continue; }
+    fail=0;
+    const t=pick(cands); t.terrain=kind; reg.push(t); placed++;
+  }
+}
+
+function generateTerrain(){
+  buildTiles();
+  const total = tiles.size;                                  // 217
+  growRegion('sea',      Math.round(total*0.20), 4, 5);      // 바다 ~43
+  growRegion('mountain', Math.round(total*0.16), 5, 5);      // 산   ~35
+  let cities = Math.round(total*0.08), guard=0;              // 도시 ~17 (서로 인접 금지)
+  while(cities>0 && guard++<3000){
+    const t = pick([...tiles.values()].filter(t=>t.terrain==='plain'));
+    if(!t) break;
+    if(nbrs(t).some(n=>n.terrain==='city')) continue;
+    t.terrain='city'; cities--;
+  }
+  const mts=[...tiles.values()].filter(t=>t.terrain==='mountain');
+  const peaks=[]; guard=0;                                   // 봉우리 8곳, 서로 4칸 이상
+  while(peaks.length<8 && guard++<2000 && mts.length){
+    const t=pick(mts);
+    if(t.peak) continue;
+    if(peaks.every(p=>hexDist(p,t)>=4)){ t.peak=true; peaks.push(t); }
+  }
+  if(peaks.length<2) mts.slice(0,2).forEach(t=>{ if(!t.peak){t.peak=true;} });
+}
+
+/* ═══════════ 보드 렌더 ═══════════ */
+const board = $('board');
+let layerTiles, layerStatic, layerMark, layerPawn;
+
+function hexPoints(cx,cy){
+  const p=[];
+  for(let i=0;i<6;i++){ const a=Math.PI/180*(60*i-30);
+    p.push((cx+SIZE*Math.cos(a)).toFixed(2)+','+(cy+SIZE*Math.sin(a)).toFixed(2)); }
+  return p.join(' ');
+}
+
+function drawBoard(){
+  board.innerHTML='';
+  const xs=[...tiles.values()].map(t=>t.x), ys=[...tiles.values()].map(t=>t.y), pad=SIZE*1.5;
+  const minX=Math.min(...xs)-pad, maxX=Math.max(...xs)+pad;
+  const minY=Math.min(...ys)-pad, maxY=Math.max(...ys)+pad;
+  board.setAttribute('viewBox',`${minX} ${minY} ${maxX-minX} ${maxY-minY}`);
+
+  layerTiles=svgEl('g'); layerStatic=svgEl('g'); layerMark=svgEl('g'); layerPawn=svgEl('g');
+  board.append(layerTiles, layerStatic, layerMark, layerPawn);
+
+  for(const t of tiles.values()){
+    const p = svgEl('polygon',{points:hexPoints(t.x,t.y), fill:TERRAIN[t.terrain].fill, class:'hex'});
+    p.addEventListener('click', ()=>onTileClick(t));
+    p.addEventListener('mouseenter', ()=>{
+      $('hoverInfo').textContent =
+        `(${t.q}, ${t.r}) · ${TERRAIN[t.terrain].name}${t.peak?' 봉우리 ▲':''}`;
+    });
+    t.poly=p; layerTiles.appendChild(p);
+    if(t.peak){
+      const tri=svgEl('text',{x:t.x, y:t.y+5, 'text-anchor':'middle','font-size':15,
+        fill:'#FFFFFF','pointer-events':'none', opacity:.85});
+      tri.textContent='▲'; layerStatic.appendChild(tri);
+    }
+  }
+}
+
+/* 은신 중인 세력의 실제 위치는 (사람이 조작하는) 자기 차례에만 보인다 */
+const isAI = f => setup.mode==='ai' && f.id!==setup.myFaction;
+const visible = f => !f.hidden || (S.factions[S.turn].id===f.id && !isAI(f));
+
+function render(){
+  const cur = S.factions[S.turn];
+  const hl = new Set(S.highlight);
+  for(const t of tiles.values()){
+    let c='hex';
+    if(hl.has(K(t.q,t.r))) c += (S.mode==='power' ? ' hl2 clickable' : ' hl clickable');
+    if(!S.over && visible(cur) && cur.pos.q===t.q && cur.pos.r===t.r) c+=' sel';
+    t.poly.setAttribute('class', c);
+  }
+
+  layerMark.innerHTML='';
+  for(const c of S.faceUp){
+    const t=tiles.get(c.at);
+    const g=svgEl('g',{'pointer-events':'none'});
+    g.append(svgEl('circle',{cx:t.x, cy:t.y, r:11.5, fill:'#022128','fill-opacity':.55,
+      stroke:'#F5C451','stroke-width':1.2,'stroke-opacity':.7}));
+    const tx=svgEl('text',{x:t.x, y:t.y+6,'text-anchor':'middle','font-size':16});
+    tx.textContent='💰'; g.append(tx);
+    layerMark.append(g);
+  }
+
+  layerPawn.innerHTML='';
+  for(const f of S.factions){
+    const shown = visible(f);
+    const t = shown ? tiles.get(K(f.pos.q,f.pos.r)) : tiles.get(f.lastKnown);
+    if(!t) continue;
+    const g=svgEl('g',{'pointer-events':'none', opacity: shown?1:.7});
+    g.append(svgEl('circle',{cx:t.x, cy:t.y, r:14, fill:f.color,
+      stroke:'#FFFFFF','stroke-width':2, 'stroke-dasharray': f.hidden?'4 3':'none'}));
+    const ic=svgEl('text',{x:t.x, y:t.y+6,'text-anchor':'middle','font-size': shown?15:16,
+      fill:'#FFFFFF','font-weight':'900'});
+    ic.textContent = shown ? f.icon : '?';
+    g.append(ic);
+    layerPawn.append(g);
+  }
+  renderPanel();
+}
+
+/* ═══════════ 패널 렌더 ═══════════ */
+function renderPanel(){
+  const f = S.factions[S.turn];
+  const ai = isAI(f);
+  $('tAvatar').textContent = f.icon;
+  $('tAvatar').style.background = f.color;
+  $('tName').textContent = `${f.name}의 차례${ai?' (AI)':''}`;
+  const t = tiles.get(K(f.pos.q,f.pos.r));
+  $('tWhere').textContent = (!visible(f))
+    ? '위치 비공개 · 은신 중'
+    : `(${t.q}, ${t.r}) · ${TERRAIN[t.terrain].name}${t.peak?' ▲':''}${f.hidden?' · 은신 중':''}`;
+
+  const pips=$('pips'); pips.innerHTML='';
+  for(let i=0;i<ACTIONS_PER_TURN;i++){
+    const d=document.createElement('div'); d.className='pip'+(i<S.left?' on':''); pips.append(d);
+  }
+
+  const onTre = S.faceUp.some(c=>c.at===K(f.pos.q,f.pos.r));
+  const canPower = powerTargets(f)!==null;
+  const lock = S.over || S.left<=0 || ai;
+  $('aMove').disabled  = lock;
+  $('aPower').disabled = lock || !canPower;
+  $('aTake').disabled  = lock || !onTre;
+  $('aEnd').disabled   = S.over || ai;
+  $('aMove').classList.toggle('on', S.mode==='move');
+  $('aPower').classList.toggle('on', S.mode==='power');
+
+  let h='';
+  if(S.over) h='게임이 끝났습니다.';
+  else if(ai) h='AI가 생각하는 중…';
+  else if(S.mode==='move')  h='흰 테두리로 표시된 인접 칸을 클릭해 이동하세요.';
+  else if(S.mode==='power') h = f.id==='pirate'
+      ? `물길을 따라 이어진 바다 칸(최대 ${WATER_RANGE}칸)으로 이동합니다.`
+      : '집라인으로 건너갈 다른 봉우리 ▲ 를 클릭하세요.';
+  else if(!canPower) h = `능력은 ${f.id==='bandit'?'산 봉우리 ▲':TERRAIN[f.home].name+' 칸'} 위에서만 사용할 수 있습니다.`;
+  else h='행동을 선택하세요.';
+  $('hint').textContent = h;
+
+  $('scores').innerHTML = S.factions.map(x=>{
+    const target = medianLoot(x);
+    const chips = [...x.loot].sort((a,b)=>a.value-b.value).map(c=>
+      `<div class="chip${c===target?' mark':''}" title="${c.name} ${c.value}점">${c.value}</div>`).join('');
+    return `<div class="srow">
+      <div class="avatar" style="width:26px;height:26px;border-radius:8px;font-size:13px;background:${x.color}">${x.icon}</div>
+      <div class="nm">${x.name}${isAI(x)?'<span style="color:var(--ink-30);font-size:var(--fs-xs)"> AI</span>':''}</div>
+      <div class="chips">${chips||'<span style="color:var(--ink-30);font-size:var(--fs-xs)">보물 없음</span>'}</div>
+      <div class="pts num">${score(x)}</div></div>`;
+  }).join('');
+
+  $('faceup').innerHTML = S.faceUp.map(c=>{
+    const tt=tiles.get(c.at);
+    return `<div class="tre" data-at="${c.at}"><span>💰</span>
+      <span class="nm">${c.name}</span><span class="v">${c.value}점</span>
+      <span class="co">(${tt.q}, ${tt.r}) ${TERRAIN[tt.terrain].name}</span></div>`;
+  }).join('') || '<div style="color:var(--ink-30)">공개된 보물이 없습니다</div>';
+  document.querySelectorAll('.tre').forEach(el=>el.onclick=()=>flash(el.dataset.at));
+
+  $('deckN').textContent  = S.deck.length;
+  $('takenN').textContent = S.taken;
+  $('log').innerHTML = S.log.slice(0,50).join('');
+}
+
+function flash(key){
+  const t=tiles.get(key); if(!t) return;
+  t.poly.classList.add('flash');
+  setTimeout(()=>t.poly.classList.remove('flash'),1200);
+}
+function log(msg){ S.log.unshift(`<div>${msg}</div>`); }
+const score = f => f.loot.reduce((s,c)=>s+c.value,0);
+
+/* ═══════════ 게임 시작 ═══════════ */
+function newGame(newTerrain){
+  clearTimeout(aiTimer);
+  if(newTerrain) generateTerrain();
+  S = { factions:[], turn:0, left:ACTIONS_PER_TURN, mode:null, highlight:[],
+        deck:[], faceUp:[], taken:0, log:[], over:false };
+
+  const starts = chooseStarts();
+  FACTIONS.forEach((def,i)=>{
+    const s = starts[i];
+    S.factions.push({...def, pos:{q:s.q,r:s.r}, loot:[], hidden:false, hiddenTurns:0,
+                     lastKnown:K(s.q,s.r)});
+  });
+
+  S.deck = shuffle(Array.from({length:DECK_SIZE},(_,i)=>({
+    id:i+1, name:pick(TREASURE_NAMES), value:1+rnd(3)
+  })));
+  for(let i=0;i<FACEUP;i++) drawCard();
+
+  if(newTerrain) drawBoard();
+  $('modeTag').textContent = setup.mode==='ai'
+    ? `AI 대전 · 나는 ${FACTIONS.find(f=>f.id===setup.myFaction).name}`
+    : '3인 플레이';
+  $('btnVeil').classList.toggle('hidden', setup.mode!=='local');
+  log('<b class="hi">새 게임을 시작합니다.</b> 해적 → 산적 → 도적 순서로 진행합니다.');
+  setMode('move');
+  maybeAI();
+}
+
+/* 세 세력이 서로 가장 멀리 떨어지도록 시작 칸을 고른다 (후보는 각자의 고향 지형) */
+function chooseStarts(){
+  const all=[...tiles.values()];
+  const cands = FACTIONS.map(def=>{
+    let c = all.filter(t=>t.terrain===def.home && (def.id!=='bandit' || t.peak));
+    if(!c.length) c = all.filter(t=>t.terrain===def.home);
+    return c.length ? c : all;
+  });
+  let best=null, bestScore=-1;
+  for(const a of cands[0]) for(const b of cands[1]) for(const c of cands[2]){
+    const m = Math.min(hexDist(a,b), hexDist(b,c), hexDist(a,c));
+    const sum = hexDist(a,b)+hexDist(b,c)+hexDist(a,c);
+    const sc = m*1000 + sum;                    // 최소 거리 우선, 동률이면 합이 큰 쪽
+    if(sc>bestScore){ bestScore=sc; best=[a,b,c]; }
+  }
+  return best;
+}
+
+function freeTile(){
+  const used = new Set([...S.faceUp.map(c=>c.at), ...S.factions.map(f=>K(f.pos.q,f.pos.r))]);
+  return pick([...tiles.keys()].filter(k=>!used.has(k)));
+}
+function drawCard(){
+  if(!S.deck.length) return null;
+  const c=S.deck.pop(); c.at=freeTile(); S.faceUp.push(c); return c;
+}
+
+/* ═══════════ 약탈 ═══════════ */
+/* 가장 비싼 것도 가장 싼 것도 아닌, 중간 값어치의 보물 */
+function medianLoot(f){
+  if(f.loot.length<3) return null;
+  const sorted=[...f.loot].sort((a,b)=>a.value-b.value || a.id-b.id);
+  const mid=sorted.slice(1,-1);
+  return mid[Math.floor((mid.length-1)/2)];
+}
+
+/* 조우 처리 — 효과를 적용하고 기록 문구 배열을 돌려준다 */
+function resolveEncounter(mover){
+  const out=[];
+  const key=K(mover.pos.q,mover.pos.r), t=tiles.get(key);
+  const here=S.factions.filter(f=>K(f.pos.q,f.pos.r)===key);
+  if(here.length<2) return out;
+
+  here.forEach(f=>{ if(f.hidden){ f.hidden=false; f.hiddenTurns=0; f.lastKnown=key;
+    out.push(`👁️ <b>${f.name}</b>이(가) 조우로 정체를 드러냈습니다.`); } });
+
+  const dom = here.find(f=>f.home===t.terrain);
+  if(!dom){
+    out.push(`⚔️ (${t.q}, ${t.r}) ${TERRAIN[t.terrain].name}에서 조우 — <span class="warn">우세 세력이 없어 약탈은 없습니다.</span>`);
+    return out;
+  }
+  for(const victim of here){
+    if(victim===dom) continue;
+    const c=medianLoot(victim);
+    if(!c){
+      out.push(`⚔️ <b>${dom.name}</b>이(가) ${TERRAIN[t.terrain].name}에서 우세를 잡았지만 <b>${victim.name}</b>에게서 빼앗을 중간 값어치 보물이 없습니다.`);
+      continue;
+    }
+    victim.loot.splice(victim.loot.indexOf(c),1);
+    dom.loot.push(c);
+    out.push(`⚔️ <span class="warn"><b>${dom.name}</b>이(가) ${TERRAIN[t.terrain].name}의 우세로 <b>${victim.name}</b>의 <b>${c.name}</b>(${c.value}점)을 약탈!</span>`);
+  }
+  return out;
+}
+
+/* ═══════════ 행동 ═══════════ */
+function setMode(m){
+  const f=S.factions[S.turn];
+  if(S.over || S.left<=0 || isAI(f)){ S.mode=null; S.highlight=[]; render(); return; }
+  if(S.mode===m){ S.mode=null; S.highlight=[]; render(); return; }
+  S.mode=m;
+  if(m==='move'){
+    S.highlight = nbrs(tiles.get(K(f.pos.q,f.pos.r))).map(t=>K(t.q,t.r));
+  }else if(m==='power'){
+    const tg=powerTargets(f);
+    if(tg===null){ S.mode=null; S.highlight=[]; }
+    else if(tg==='instant'){ S.mode=null; S.highlight=[]; useStealth(f); return; }
+    else S.highlight=tg;
+  }
+  render();
+}
+
+/* null=불가 / 'instant'=즉시발동 / 배열=목표 칸 키 목록 */
+function powerTargets(f){
+  const t=tiles.get(K(f.pos.q,f.pos.r));
+  if(f.id==='pirate'){
+    if(t.terrain!=='sea') return null;
+    const seen=new Map([[K(t.q,t.r),0]]), qq=[t], out=[];
+    while(qq.length){
+      const c=qq.shift(), d=seen.get(K(c.q,c.r));
+      if(d>=WATER_RANGE) continue;
+      for(const n of nbrs(c)){
+        const nk=K(n.q,n.r);
+        if(n.terrain!=='sea' || seen.has(nk)) continue;
+        seen.set(nk,d+1); qq.push(n); out.push(nk);
+      }
+    }
+    return out.length?out:null;
+  }
+  if(f.id==='bandit'){
+    if(!t.peak) return null;
+    const out=[...tiles.values()].filter(x=>x.peak && x!==t).map(x=>K(x.q,x.r));
+    return out.length?out:null;
+  }
+  if(f.id==='thief') return t.terrain==='city' ? 'instant' : null;
+  return null;
+}
+
+function useStealth(f){
+  f.hidden=true; f.hiddenTurns=2;                  // 이번 턴 끝 + 다음 자기 턴 끝까지
+  f.lastKnown=K(f.pos.q,f.pos.r);
+  spend(`${f.icon} <b>${f.name}</b>이(가) 도시에서 <b class="hi">은신</b>했습니다 — 위치 비공개.`);
+}
+
+function doMove(t, viaPower){
+  const f=S.factions[S.turn];
+  f.pos={q:t.q,r:t.r};
+  const how = !viaPower ? '이동' : (f.id==='pirate' ? '물길을 타고 이동' : '집라인으로 이동');
+  const msg = `${f.icon} <b>${f.name}</b> ${how} → (${t.q}, ${t.r}) ${TERRAIN[t.terrain].name}`;
+  const enc = resolveEncounter(f);          // 조우가 있으면 은신이 풀릴 수 있다
+  spend(msg, f.hidden, enc);                // 여전히 은신 중이면 이동 내용은 비공개
+}
+
+function onTileClick(t){
+  if(S.over || !S.mode) return;
+  if(isAI(S.factions[S.turn])) return;
+  if(!S.highlight.includes(K(t.q,t.r))) return;
+  doMove(t, S.mode==='power');
+}
+
+function takeTreasure(){
+  const f=S.factions[S.turn];
+  const idx=S.faceUp.findIndex(c=>c.at===K(f.pos.q,f.pos.r));
+  if(idx<0) return;
+  const c=S.faceUp.splice(idx,1)[0];
+  f.loot.push(c); S.taken++;
+  if(f.hidden){ f.hidden=false; f.hiddenTurns=0; f.lastKnown=K(f.pos.q,f.pos.r); }
+  let msg=`${f.icon} <b>${f.name}</b>이(가) (${f.pos.q}, ${f.pos.r})에서 <b class="hi">${c.name}</b>(${c.value}점) 획득!`;
+  const n=drawCard();
+  if(n){ const nt=tiles.get(n.at);
+    msg += ` 새 카드 <b>${n.name}</b>이(가) (${nt.q}, ${nt.r})에 공개.`; }
+  spend(msg);
+  if(!S.deck.length) gameOver();
+}
+
+function spend(msg, secret, extra){
+  const f=S.factions[S.turn];
+  S.left--;
+  log(secret
+    ? `${f.icon} <b>${f.name}</b>이(가) 은밀히 움직였습니다 <span style="opacity:.55">(비공개)</span>`
+    : msg);
+  (extra||[]).forEach(log);                 // 조우 결과는 이동 기록 위에 쌓인다
+  S.mode=null; S.highlight=[];
+  if(S.over){ render(); return; }
+  if(S.left<=0){ render(); aiTimer=setTimeout(endTurn, 400); }
+  else if(isAI(f)){ render(); aiTimer=setTimeout(aiStep, AI_DELAY); }
+  else setMode('move');
+}
+
+function endTurn(){
+  if(S.over){ render(); return; }
+  const f=S.factions[S.turn];
+  if(f.hidden){
+    f.hiddenTurns--;
+    if(f.hiddenTurns<=0){
+      f.hidden=false; f.lastKnown=K(f.pos.q,f.pos.r);
+      log(`👁️ <b>${f.name}</b>의 은신이 풀렸습니다 → (${f.pos.q}, ${f.pos.r})`);
+    }
+  }
+  S.turn=(S.turn+1)%S.factions.length;
+  S.left=ACTIONS_PER_TURN; S.mode=null; S.highlight=[];
+  const nx=S.factions[S.turn];
+  log(`— ${nx.icon} <b>${nx.name}</b>의 차례 —`);
+  if(setup.mode==='local' && S.factions.some(x=>x.hidden)) showVeil(`${nx.icon} ${nx.name}의 차례입니다`);
+  setMode('move');
+  maybeAI();
+}
+
+function gameOver(){
+  S.over=true; S.mode=null; S.highlight=[];
+  clearTimeout(aiTimer);
+  S.factions.forEach(f=>{ f.hidden=false; f.lastKnown=K(f.pos.q,f.pos.r); });
+  const best=Math.max(...S.factions.map(score));
+  const win=S.factions.filter(f=>score(f)===best);
+  $('overBody').innerHTML =
+    S.factions.slice().sort((a,b)=>score(b)-score(a)).map(f=>
+      `<div class="srow" style="justify-content:center;gap:var(--sp-3)">
+         <div class="avatar" style="width:30px;height:30px;border-radius:9px;font-size:15px;background:${f.color}">${f.icon}</div>
+         <div class="nm" style="width:auto">${f.name}</div>
+         <div style="color:var(--ink-50);font-size:var(--fs-sm)">보물 ${f.loot.length}장</div>
+         <div class="pts num" style="margin-left:0">${score(f)}</div>
+       </div>`).join('')
+    + `<div style="margin-top:var(--sp-4);font-weight:900;font-size:var(--fs-xl)">
+         🏆 ${win.map(f=>f.name).join(' · ')} ${win.length>1?'공동 승리!':'승리!'}</div>`;
+  $('over').classList.add('show');
+  log('<b class="warn">게임 오버</b> — 보물 더미가 바닥났습니다.');
+  render();
+}
+
+function showVeil(msg){ $('veilMsg').textContent=msg; $('veil').classList.add('show'); }
+
+/* ═══════════ AI ═══════════ */
+function maybeAI(){
+  if(S.over) return;
+  if(isAI(S.factions[S.turn])){ render(); aiTimer=setTimeout(aiStep, AI_DELAY); }
+}
+
+/* 목표 칸까지 최단경로의 첫 걸음 */
+function bfsStep(from, targets){
+  const fromK=K(from.q,from.r);
+  const prev=new Map([[fromK,null]]), q=[from];
+  while(q.length){
+    const c=q.shift(), ck=K(c.q,c.r);
+    if(targets.has(ck) && ck!==fromK){
+      let cur=ck, p=prev.get(cur);
+      while(p && p!==fromK){ cur=p; p=prev.get(cur); }
+      return tiles.get(cur);
+    }
+    for(const n of nbrs(c)){
+      const nk=K(n.q,n.r);
+      if(!prev.has(nk)){ prev.set(nk,ck); q.push(n); }
+    }
+  }
+  return null;
+}
+
+function aiChoose(f){
+  const myKey=K(f.pos.q,f.pos.r), myTile=tiles.get(myKey);
+
+  // 1) 발밑에 보물이 있으면 바로 획득
+  if(S.faceUp.some(c=>c.at===myKey)) return {act:'take'};
+
+  // 2) 내 고향 지형의 인접 칸에 털 만한 상대가 있으면 덮친다
+  for(const n of nbrs(myTile)){
+    if(n.terrain!==f.home) continue;
+    const victim=S.factions.find(x=>x!==f && K(x.pos.q,x.pos.r)===K(n.q,n.r) && medianLoot(x));
+    if(victim) return {act:'move', to:n};
+  }
+
+  const targets=new Set(S.faceUp.map(c=>c.at));
+  if(!targets.size) return {act:'end'};
+  const goal=[...targets].map(k=>tiles.get(k))
+                .reduce((a,b)=> hexDist(f.pos,a)<=hexDist(f.pos,b)?a:b);
+  const dNow=hexDist(f.pos,goal);
+
+  // 3) 능력이 2칸 이상 이득이면 사용
+  const pw=powerTargets(f);
+  if(Array.isArray(pw)){
+    let bt=null, bd=dNow;
+    for(const k of pw){ const t=tiles.get(k), d=hexDist(t,goal); if(d<bd){ bd=d; bt=t; } }
+    if(bt && dNow-bd>=2) return {act:'power', to:bt};
+  }else if(pw==='instant' && !f.hidden && f.loot.length>=1){
+    return {act:'power'};                          // 보물을 지고 있으면 은신
+  }
+
+  // 4) 가장 가까운 보물 쪽으로 한 칸
+  const step=bfsStep(myTile,targets);
+  return step ? {act:'move', to:step} : {act:'end'};
+}
+
+function aiStep(){
+  if(S.over) return;
+  const f=S.factions[S.turn];
+  if(!isAI(f)) return;
+  if(S.left<=0){ endTurn(); return; }
+  const d=aiChoose(f);
+  if(d.act==='take')       takeTreasure();
+  else if(d.act==='move')  doMove(d.to,false);
+  else if(d.act==='power'){ if(d.to) doMove(d.to,true); else useStealth(f); }
+  else { log(`${f.icon} <b>${f.name}</b>이(가) 턴을 마쳤습니다.`); endTurn(); }
+}
+
+/* ═══════════ 시작 화면 ═══════════ */
+$('picks').innerHTML = FACTIONS.map(f=>
+  `<div class="pick${f.id==='pirate'?' on':''}" data-f="${f.id}">
+     <div class="e">${f.icon}</div><div class="n">${f.name}</div>
+     <div class="s">${TERRAIN[f.home].name} · ${f.power}</div></div>`).join('');
+
+document.querySelectorAll('.opt').forEach(el=>el.onclick=()=>{
+  document.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  setup.mode=el.dataset.mode;
+  $('pickWrap').classList.toggle('hidden', setup.mode!=='ai');
+});
+document.querySelectorAll('.pick').forEach(el=>el.onclick=()=>{
+  document.querySelectorAll('.pick').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  setup.myFaction=el.dataset.f;
+});
+$('startGo').onclick = ()=>{ $('start').classList.remove('show'); newGame(true); render(); };
+
+/* ═══════════ 이벤트 ═══════════ */
+$('aMove').onclick  = ()=>setMode('move');
+$('aPower').onclick = ()=>setMode('power');
+$('aTake').onclick  = takeTreasure;
+$('aEnd').onclick   = ()=>{ log('턴을 일찍 종료했습니다.'); endTurn(); };
+$('btnTerrain').onclick = ()=>{ newGame(true);  render(); };
+$('btnRestart').onclick = ()=>{ newGame(false); render(); };
+$('btnVeil').onclick    = ()=>showVeil('화면을 가렸습니다');
+$('btnNew').onclick     = ()=>{ clearTimeout(aiTimer); $('over').classList.remove('show'); $('start').classList.add('show'); };
+$('veilOk').onclick     = ()=>$('veil').classList.remove('show');
+$('overOk').onclick     = ()=>{ $('over').classList.remove('show'); $('start').classList.add('show'); };
+
+/* 시작 화면 뒤에 깔릴 초기 보드 */
+generateTerrain();
+drawBoard();
+newGame(false);
+render();
+</script>
+</body>
+</html>

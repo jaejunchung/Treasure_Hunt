@@ -1,0 +1,9 @@
+# 참고용 PDF는 올리지 않는다 — 디자인 시스템 문서 2개만 예외
+*.pdf
+!Typography & colors.pdf
+!Treasure 96 - Get your treasure.pdf
+
+# 도구 설정
+.claude/
+.DS_Store
+Thumbs.db
